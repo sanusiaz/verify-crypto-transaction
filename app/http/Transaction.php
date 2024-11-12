@@ -20,7 +20,7 @@ class Transaction
 {
     protected $services = [
         'eth' => [
-            'url' => 'https://api.etherscan.io/api?module=account&action=txlist&address={address}&startblock=0&endblock=99999999&sort=desc&apikey=8SY9EV4IUY9EYS45DYMMBMK2W62B6996J9',
+            'url' => 'https://api.etherscan.io/api?module=account&action=txlist&address={address}&startblock=0&endblock=99999999&sort=desc&apikey=YOUR_API_KEY_HERE',
         ],
 
         'btc' => [
