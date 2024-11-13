@@ -168,7 +168,7 @@ if (isset($_POST) && isset($_POST['submit'])) {
                     <select name="currency" id="currency" onchange="getEquivalentPrice()">
                         <option value="" selected></option>
                         <option value="usd">USD</option>
-                        <option value="euro">Euro</option>
+                        <option value="eur">Euro</option>
                         <option value="gbp">GBP</option>
                     </select>
                 </div>
@@ -176,7 +176,8 @@ if (isset($_POST) && isset($_POST['submit'])) {
                 <!-- currency value -->
                 <div class="section" id="currency_amount_section" style="width: 80%; display: none;">
                     <label for="currencyAmount">Amount</label>
-                    <input type="text" id="currencyAmount" name="currency_amount" placeholder="Amount to send" value="0" onchange="getEquivalentPrice()">
+                    <input type="text" id="currencyAmount" name="currency_amount" placeholder="Amount to send" value="0"
+                        onchange="getEquivalentPrice()">
                 </div>
             </div>
 
@@ -210,31 +211,37 @@ if (isset($_POST) && isset($_POST['submit'])) {
             }
         }
 
-        function getEquivalentPrice() {
+        async function getEquivalentPrice() {
 
             const currency = document.querySelector('select[name=currency]').value
             const amount = document.getElementById('currencyAmount')
             const currency_amount = amount.value
             let walletType = document.getElementById('walletType').value.toLowerCase();
 
-
             const walletAmount = document.getElementById('amount');
 
             document.getElementById('currency_amount_section').style.display = 'block'
             amount.setAttribute('placeholder', 'Enter Amount in ' + currency);
 
-            fetch(new Request("https://api.coingecko.com/api/v3/coins/markets?vs_currency=" + currency +"&order=market_cap_desc&per_page=100&page=1&sparkline=false"), {
-                method: "get",
-                mode: 'no-cors'
-            }).then(response => response.json())
-                .then(data => {
-                    let __coin = data.filter(e => e.symbol === walletType)[0]
-                    let __price = __coin.current_price;
-                    console.log(currency_amount /__price)
+            try {
 
-                    walletAmount.value =  currency_amount /__price;
-                   
-                });
+                const response = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=" + currency + "&order=market_cap_desc&per_page=100&page=1&sparkline=false", {
+                    method: "get",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*",
+                    }
+                })
+
+                let data = await response.json()
+                let __coin = data.filter(e => e.symbol === walletType)[0]
+                let __price = __coin.current_price;
+
+                walletAmount.value = currency_amount / __price;
+
+            } catch (error) {
+                console.error(error)
+            }
 
         }
 
