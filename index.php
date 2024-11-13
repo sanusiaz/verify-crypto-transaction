@@ -3,12 +3,17 @@ error_reporting(E_ALL & ~E_DEPRECATED); // disable error reporting temporarily
 
 require __DIR__ . "/vendor/autoload.php";
 require_once dirname(__FILE__) . "/app/http/Transaction.php";
+require_once dirname(__FILE__) . "/app/http/QRCode.php";
 
 $config = require_once(dirname(__FILE__) . "/config.php");
 
 $transaction = new Transaction();
 $btc_address = $config['wallet']['addresses']['btc'] ?? $transaction->generateAddress(true, $config['keys']['xpub']); // btc address
 $eth_address = $config['wallet']['addresses']['eth'];
+
+// parsed QR codes
+$btc_qrcode_data = (new QRCode($btc_address))->parseQRCode(); // btc qrcode 
+$eth_qrcode_data = (new QRCode($eth_address))->parseQRCode(); // eth qr code
 
 if (isset($_POST) && isset($_POST['submit'])) {
 
@@ -119,7 +124,7 @@ if (isset($_POST) && isset($_POST['submit'])) {
         <form method="post" action="index.php">
             <!-- Wallet Dropdown Section -->
             <div class="section">
-                <label for="walletType">Select Wallet</label>
+                <label for="walletType">Select Wallet*</label>
                 <select id="walletType" name="walletType" onchange="updateWalletAddress()">
                     <option value="BTC">
                         <svg class="crypto-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
@@ -144,15 +149,41 @@ if (isset($_POST) && isset($_POST['submit'])) {
                 </select>
             </div>
 
+            <div class="section">
+                <img id="walletAddressQRCode" style="width: 130px;" src="data:image/png;base64,<?= $btc_qrcode_data; ?>"
+                    alt="">
+            </div>
+
             <!-- Wallet Address Field (Dynamic) -->
             <div class="section">
-                <label for="walletAddress">Wallet Address</label>
+                <label for="walletAddress">Wallet Address*</label>
                 <input type="text" id="walletAddress" name="walletAddress" value="<?= $btc_address; ?>" readonly>
             </div>
 
+            <div style="display: flex; gap: 20px; width: 96%; padding: 0px; margin: 0px;">
+
+                <!-- Currency -->
+                <div class="section" style="width: 30%;">
+                    <label for="currency">Currency</label>
+                    <select name="currency" id="currency" onchange="getEquivalentPrice()">
+                        <option value="" selected></option>
+                        <option value="usd">USD</option>
+                        <option value="euro">Euro</option>
+                        <option value="gbp">GBP</option>
+                    </select>
+                </div>
+
+                <!-- currency value -->
+                <div class="section" id="currency_amount_section" style="width: 80%; display: none;">
+                    <label for="currencyAmount">Amount</label>
+                    <input type="text" id="currencyAmount" name="currency_amount" placeholder="Amount to send" value="0" onchange="getEquivalentPrice()">
+                </div>
+            </div>
+
+
             <!-- Enter Amount Section -->
             <div class="section">
-                <label for="amount">Enter Amount</label>
+                <label for="amount">Equivalent Amount in BTC</label>
                 <input type="text" id="amount" name="amount" placeholder="Amount to send" required>
             </div>
 
@@ -165,13 +196,48 @@ if (isset($_POST) && isset($_POST['submit'])) {
         function updateWalletAddress() {
             const walletType = document.getElementById('walletType').value;
             const walletAddressField = document.getElementById('walletAddress');
+            const walletAddressQRCode = document.getElementById('walletAddressQRCode');
+
+            document.querySelector('label[for=amount]').innerText = 'Equivalent Amount in ' + walletType
 
             if (walletType === 'BTC') {
                 walletAddressField.value = '<?= $btc_address; ?>';
+
+                walletAddressQRCode.src = 'data:image/png;base64,<?= $btc_qrcode_data; ?>';
             } else if (walletType === 'ETH') {
                 walletAddressField.value = '<?= $eth_address; ?>';
+                walletAddressQRCode.src = 'data:image/png;base64,<?= $eth_qrcode_data; ?>';
             }
         }
+
+        function getEquivalentPrice() {
+
+            const currency = document.querySelector('select[name=currency]').value
+            const amount = document.getElementById('currencyAmount')
+            const currency_amount = amount.value
+            let walletType = document.getElementById('walletType').value.toLowerCase();
+
+
+            const walletAmount = document.getElementById('amount');
+
+            document.getElementById('currency_amount_section').style.display = 'block'
+            amount.setAttribute('placeholder', 'Enter Amount in ' + currency);
+
+            fetch(new Request("https://api.coingecko.com/api/v3/coins/markets?vs_currency=" + currency +"&order=market_cap_desc&per_page=100&page=1&sparkline=false"), {
+                method: "get",
+                mode: 'no-cors'
+            }).then(response => response.json())
+                .then(data => {
+                    let __coin = data.filter(e => e.symbol === walletType)[0]
+                    let __price = __coin.current_price;
+                    console.log(currency_amount /__price)
+
+                    walletAmount.value =  currency_amount /__price;
+                   
+                });
+
+        }
+
     </script>
 
 </body>

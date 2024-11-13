@@ -21,6 +21,14 @@ class ComposerStaticInit42eecb2ea7e3c66ece3f6a476fce8ae3
         array (
             'FG\\' => 3,
         ),
+        'E' => 
+        array (
+            'Endroid\\QrCode\\' => 15,
+        ),
+        'D' => 
+        array (
+            'DASPRiD\\Enum\\' => 13,
+        ),
         'C' => 
         array (
             'Composer\\Semver\\' => 16,
@@ -29,6 +37,7 @@ class ComposerStaticInit42eecb2ea7e3c66ece3f6a476fce8ae3
         array (
             'BitWasp\\Buffertools\\' => 20,
             'BitWasp\\Bitcoin\\' => 16,
+            'BaconQrCode\\' => 12,
         ),
     );
 
@@ -41,6 +50,14 @@ class ComposerStaticInit42eecb2ea7e3c66ece3f6a476fce8ae3
         array (
             0 => __DIR__ . '/..' . '/fgrosse/phpasn1/lib',
         ),
+        'Endroid\\QrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/endroid/qr-code/src',
+        ),
+        'DASPRiD\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
+        ),
         'Composer\\Semver\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/semver/src',
@@ -52,6 +69,10 @@ class ComposerStaticInit42eecb2ea7e3c66ece3f6a476fce8ae3
         'BitWasp\\Bitcoin\\' => 
         array (
             0 => __DIR__ . '/..' . '/bitwasp/bitcoin/src',
+        ),
+        'BaconQrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
     );
 
